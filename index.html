@@ -3,47 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Plot Graph</title>
+    <title>Fresh Market Prices</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: system-ui, sans-serif;
+            font-family: 'Nunito', system-ui, sans-serif;
             max-width: 900px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            background: #f9f7f2;
+            color: #2d3a2e;
         }
+        h1 { color: #3a5f3a; text-align: center; margin-bottom: 0.5rem; font-size: 2rem; }
+        .subtitle { text-align: center; color: #6b7c6b; margin-bottom: 2rem; font-size: 1.1rem; }
         canvas { max-width: 100%; }
         #error { color: red; margin-top: 1rem; }
+        .legend-note { text-align: center; color: #6b7c6b; margin-top: 1rem; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-    <h1>CSV Data Visualization</h1>
+    <h1>🍎 Fresh Market Prices</h1>
+    <p class="subtitle">Seasonal fruit, vegetable &amp; dairy trends</p>
     <canvas id="csvChart"></canvas>
+    <p class="legend-note">🥕 Prices in USD/kg &nbsp;|&nbsp; 📊 Jan–Jun 2024</p>
     <pre id="error"></pre>
     <script>
-        const CSV = `Month,Sales,Expenses
-Jan,1200,800
-Feb,1500,950
-Mar,1800,1100
-Apr,2200,1300
-May,1900,1200
-Jun,2400,1400`;
+        const CSV = `Month,Apples,Tomatoes,Milk
+Jan,3.20,2.50,4.10
+Feb,3.50,2.80,4.20
+Mar,3.10,2.30,4.00
+Apr,3.80,2.90,4.30
+May,4.20,3.10,4.50
+Jun,4.50,3.40,4.80`;
 
         const lines = CSV.trim().split('\n');
         const headers = lines[0].split(',');
         const rows = lines.slice(1).map(line => line.split(',').map(v => v.trim()));
 
         const labels = rows.map(row => row[0]);
-        const datasets = headers.slice(1).map((header, i) => ({
-            label: header,
-            data: rows.map(row => parseFloat(row[i + 1])),
-            borderWidth: 2
-        }));
+        const datasets = headers.slice(1).map((header, i) => {
+            const colors = [
+                { border: '#c0392b', bg: 'rgba(192,57,43,0.15)' },   // Apples - red
+                { border: '#e67e22', bg: 'rgba(230,126,34,0.15)' },  // Tomatoes - orange
+                { border: '#2980b9', bg: 'rgba(41,128,185,0.15)' }   // Milk - blue
+            ];
+            const c = colors[i % colors.length];
+            return {
+                label: header,
+                data: rows.map(row => parseFloat(row[i + 1])),
+                borderWidth: 3,
+                borderColor: c.border,
+                backgroundColor: c.bg,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                fill: true,
+                tension: 0.3
+            };
+        });
 
         new Chart(document.getElementById('csvChart'), {
             type: 'line',
             data: { labels, datasets },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { font: { family: 'Nunito', size: 14 }, color: '#2d3a2e' } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: { display: true, text: 'Price (USD/kg)', color: '#3a5f3a', font: { family: 'Nunito', size: 13 } },
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { color: '#6b7c6b', font: { family: 'Nunito' } }
+                    },
+                    x: {
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { color: '#6b7c6b', font: { family: 'Nunito' } }
+                    }
+                }
+            }
         });
     </script>
 </body>
