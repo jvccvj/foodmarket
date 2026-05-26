@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Package site
-        run: zip -r site.zip index.html data.csv
+        run: zip -r site.zip index.html
 
       - name: Upload artifact
         uses: actions/upload-artifact@v5
