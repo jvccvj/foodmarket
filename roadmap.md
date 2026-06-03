@@ -129,3 +129,43 @@ Full log: `rails-agent-log.md`
 |----------|---------|---------|
 | `deploy.yml` | push to main | Deploy to GitHub Pages |
 | `refresh.yml` | every Monday 00:00 UTC + manual | Generate new CSV data, commit, push |
+
+---
+
+## Mercasa Data Integration
+
+**Date:** 2026-06-03
+**Source:** `/workspace/mercasa-2026-normalizado.csv`
+**Status:** ✅ Real data loaded
+
+### Dataset
+
+| Field | Description |
+|-------|-------------|
+| Source | Mercasa (Spanish wholesale food markets) |
+| Products | Cerezas (Cherries), Fresones (Strawberries) |
+| Markets | Mercamadrid, Mercabarna, Mercabilbao, Mercasevilla, Mercavalencia |
+| Date range | Jan–Dec 2026 |
+| Price unit | EUR/kg |
+
+### Aggregated Prices
+
+| Product | Month | Avg Price (EUR/kg) | Source records |
+|---------|-------|-------------------|----------------|
+| Cerezas | May | 2.33 | ~50 records across 5 markets |
+| Fresones | Mar | 1.66 | ~40 records across 5 markets |
+
+### Implementation
+
+- **Rails seeds:** `db/seeds.rb` now loads CSV, computes monthly averages
+- **Demo page:** `ror.html` updated with real Mercasa data
+- **Data file:** `/workspace/project/foodmarket-rails/data/mercasa-2026-normalizado.csv`
+
+### CSV Format (European decimal notation)
+
+```csv
+source,product,market,date_observed,date_reference,price_eur_kg,year,seasonal_flag,notes
+Mercasa,Cerezas,Mercamadrid,22/05*,26/05*,"2,80",2026,1,
+```
+
+Note: Prices use `,` as decimal separator (2,80 = €2.80)

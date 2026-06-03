@@ -204,9 +204,9 @@
   </header>
   
   <main class="container">
-    <div class="badge">Rails + Hotwire/Turbo Demo</div>
-    <h2>Fresh Food Price Trends</h2>
-    <p class="subtitle">Seasonal fruit, vegetable & dairy trends — Jan through Jun 2026</p>
+    <div class="badge">Mercasa Real Data</div>
+    <h2>Spanish Wholesale Market Prices</h2>
+    <p class="subtitle">Cerezas &amp; Fresones — sourced from 5 Mercasa markets (Spain) &nbsp;|&nbsp; EUR/kg</p>
     
     <div class="card">
       <div id="chart-frame" data-controller="chart">
@@ -217,7 +217,7 @@
           <canvas id="priceChart"></canvas>
         </div>
       </div>
-      <p class="legend-note">🥕 Prices in USD/kg &nbsp;|&nbsp; 📊 6-month trend &nbsp;|&nbsp; 🔄 Auto-refreshes every 60s</p>
+      <p class="legend-note">📊 Real data from Mercasa wholesale markets &nbsp;|&nbsp; 🔄 Auto-refreshes every 60s</p>
     </div>
     
     <div class="card">
@@ -251,13 +251,20 @@
 <span class="key">"prices"</span>: [
   &#123;
     <span class="key">"id"</span>: <span class="number">1</span>,
-    <span class="key">"item"</span>: <span class="string">"Apples"</span>,
-    <span class="key">"price"</span>: <span class="number">3.50</span>,
-    <span class="key">"unit"</span>: <span class="string">"USD/kg"</span>,
-    <span class="key">"month"</span>: <span class="string">"Jan"</span>,
-    <span class="key">"recorded_at"</span>: <span class="string">"2026-01-15T00:00:00Z"</span>
+    <span class="key">"item"</span>: <span class="string">"Cerezas"</span>,
+    <span class="key">"price"</span>: <span class="number">2.33</span>,
+    <span class="key">"unit"</span>: <span class="string">"EUR/kg"</span>,
+    <span class="key">"month"</span>: <span class="string">"May"</span>,
+    <span class="key">"recorded_at"</span>: <span class="string">"2026-05-26T00:00:00Z"</span>
   &#125;,
-  ...
+  &#123;
+    <span class="key">"id"</span>: <span class="number">2</span>,
+    <span class="key">"item"</span>: <span class="string">"Fresones"</span>,
+    <span class="key">"price"</span>: <span class="number">1.66</span>,
+    <span class="key">"unit"</span>: <span class="string">"EUR/kg"</span>,
+    <span class="key">"month"</span>: <span class="string">"Mar"</span>,
+    <span class="key">"recorded_at"</span>: <span class="string">"2026-03-15T00:00:00Z"</span>
+  &#125;
 ]
       </div>
     </div>
@@ -288,27 +295,15 @@
   </footer>
   
   <script>
-    // Simulated price data (would come from /api/prices in Rails)
+    // Real price data from Mercasa (Spanish wholesale markets)
+    // Source: /workspace/mercasa-2026-normalizado.csv
+    // Aggregated: average price per product per month
     const PRICE_DATA = {
       prices: [
-        { id: 1, item: "Apples",   price: 3.20, unit: "USD/kg", month: "Jan", recorded_at: "2026-01-15T00:00:00Z" },
-        { id: 2, item: "Apples",   price: 3.50, unit: "USD/kg", month: "Feb", recorded_at: "2026-02-15T00:00:00Z" },
-        { id: 3, item: "Apples",   price: 3.10, unit: "USD/kg", month: "Mar", recorded_at: "2026-03-15T00:00:00Z" },
-        { id: 4, item: "Apples",   price: 3.80, unit: "USD/kg", month: "Apr", recorded_at: "2026-04-15T00:00:00Z" },
-        { id: 5, item: "Apples",   price: 4.20, unit: "USD/kg", month: "May", recorded_at: "2026-05-15T00:00:00Z" },
-        { id: 6, item: "Apples",   price: 4.50, unit: "USD/kg", month: "Jun", recorded_at: "2026-06-15T00:00:00Z" },
-        { id: 7, item: "Tomatoes", price: 2.50, unit: "USD/kg", month: "Jan", recorded_at: "2026-01-15T00:00:00Z" },
-        { id: 8, item: "Tomatoes", price: 2.80, unit: "USD/kg", month: "Feb", recorded_at: "2026-02-15T00:00:00Z" },
-        { id: 9, item: "Tomatoes", price: 2.30, unit: "USD/kg", month: "Mar", recorded_at: "2026-03-15T00:00:00Z" },
-        { id: 10, item: "Tomatoes", price: 2.90, unit: "USD/kg", month: "Apr", recorded_at: "2026-04-15T00:00:00Z" },
-        { id: 11, item: "Tomatoes", price: 3.10, unit: "USD/kg", month: "May", recorded_at: "2026-05-15T00:00:00Z" },
-        { id: 12, item: "Tomatoes", price: 3.40, unit: "USD/kg", month: "Jun", recorded_at: "2026-06-15T00:00:00Z" },
-        { id: 13, item: "Milk",    price: 4.10, unit: "USD/kg", month: "Jan", recorded_at: "2026-01-15T00:00:00Z" },
-        { id: 14, item: "Milk",    price: 4.20, unit: "USD/kg", month: "Feb", recorded_at: "2026-02-15T00:00:00Z" },
-        { id: 15, item: "Milk",    price: 4.00, unit: "USD/kg", month: "Mar", recorded_at: "2026-03-15T00:00:00Z" },
-        { id: 16, item: "Milk",    price: 4.30, unit: "USD/kg", month: "Apr", recorded_at: "2026-04-15T00:00:00Z" },
-        { id: 17, item: "Milk",    price: 4.50, unit: "USD/kg", month: "May", recorded_at: "2026-05-15T00:00:00Z" },
-        { id: 18, item: "Milk",    price: 4.80, unit: "USD/kg", month: "Jun", recorded_at: "2026-06-15T00:00:00Z" }
+        // Cerezas (Cherries) — avg across 5 markets
+        { id: 1, item: "Cerezas",   price: 2.33, unit: "EUR/kg", month: "May", recorded_at: "2026-05-26T00:00:00Z" },
+        // Fresones (Strawberries) — avg across 5 markets
+        { id: 2, item: "Fresones",  price: 1.66, unit: "EUR/kg", month: "Mar", recorded_at: "2026-03-15T00:00:00Z" }
       ]
     };
 
@@ -338,9 +333,8 @@
         const items = [...new Set(prices.map(p => p.item))];
         
         const colors = {
-          'Apples':   { border: '#c0392b', bg: 'rgba(192,57,43,0.15)' },
-          'Tomatoes': { border: '#e67e22', bg: 'rgba(230,126,34,0.15)' },
-          'Milk':     { border: '#2980b9', bg: 'rgba(41,128,185,0.15)' }
+          'Cerezas':   { border: '#c0392b', bg: 'rgba(192,57,43,0.15)' },
+          'Fresones':  { border: '#e74c3c', bg: 'rgba(231,76,60,0.15)' }
         };
         
         const datasets = items.map(item => {
@@ -390,18 +384,18 @@
                   padding: 12,
                   cornerRadius: 8,
                   callbacks: {
-                    label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}/kg`
+                    label: ctx => `${ctx.dataset.label}: €${ctx.parsed.y.toFixed(2)}/kg`
                   }
                 }
               },
               scales: {
                 y: {
-                  beginAtZero: false,
-                  min: 2,
-                  max: 5.5,
+                  beginAtZero: true,
+                  min: 0,
+                  max: 4,
                   title: {
                     display: true,
-                    text: 'Price (USD/kg)',
+                    text: 'Price (EUR/kg)',
                     color: '#3a5f3a',
                     font: { family: 'Nunito', size: 13, weight: '600' }
                   },
@@ -409,7 +403,7 @@
                   ticks: { 
                     color: '#6b7c6b', 
                     font: { family: 'Nunito' },
-                    callback: v => '$' + v.toFixed(2)
+                    callback: v => '€' + v.toFixed(2)
                   }
                 },
                 x: {
