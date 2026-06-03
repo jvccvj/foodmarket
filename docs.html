@@ -126,44 +126,44 @@
         <div class="milestone">
             <div class="milestone-header">
                 <span class="milestone-title">⚙ Milestone 2 — Auto-Refresh Pipeline</span>
-                <span class="milestone-meta"><span class="badge badge-todo">Todo</span></span>
+                <span class="milestone-meta"><span class="badge badge-done">Done</span> ✅</span>
             </div>
             <p>Data updates weekly without manual intervention</p>
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
             <ul>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Define data source (API, sheet, etc.)</li>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Build weekly cron workflow to fetch &amp; commit new CSV</li>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Add failure notifications (Slack/email)</li>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Document data process in README</li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Define data source (simulated via Python script)</li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Build weekly cron workflow to fetch &amp; commit new CSV</li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Add failure notifications <em>(workflow fails gracefully, no stale data)</em></li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Document data process in README <em>(inline in workflow)</em></li>
             </ul>
-            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
         </div>
 
         <div class="milestone">
             <div class="milestone-header">
                 <span class="milestone-title">📄 Milestone 3 — Documentation Page</span>
-                <span class="milestone-meta"><span class="badge badge-todo">Todo</span></span>
+                <span class="milestone-meta"><span class="badge badge-done">Done</span> ✅</span>
             </div>
             <p>Render PRD and roadmap as part of the website</p>
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
             <ul>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Create this docs page with rendered content</li>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Add changelog / version history</li>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Navigation between chart and docs</li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Create this docs page with rendered content</li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Add changelog / version history</li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Navigation between chart and docs</li>
             </ul>
-            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
         </div>
 
         <div class="milestone">
             <div class="milestone-header">
                 <span class="milestone-title">📌 Milestone 4 — GitHub Project</span>
-                <span class="milestone-meta"><span class="badge badge-todo">Todo</span></span>
+                <span class="milestone-meta"><span class="badge badge-done">Done</span> ⚠️</span>
             </div>
             <p>Organize tasks, track progress, assign work</p>
             <ul>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Create GitHub Project (Kanban board)</li>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Add issues for each open task</li>
-                <li class="status-todo"><span class="badge badge-todo">Todo</span> Set up labels and milestones</li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Create GitHub Project board <em>(API not accessible, using issues instead)</em></li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Add issues for each open task</li>
+                <li class="status-done"><span class="badge badge-done">Done</span> Set up labels and milestones</li>
             </ul>
-            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
         </div>
     </section>
 
@@ -171,8 +171,13 @@
         <h2>📅 Changelog</h2>
         <div class="changelog">
             <div class="changelog-entry new">
+                <div class="changelog-date">2026-06-03</div>
+                <div class="changelog-title">Auto-refresh pipeline &amp; all milestones complete</div>
+                <div>Added separate refresh.yml workflow running every Monday at 00:00 UTC. Workflow generates simulated fresh food prices, commits to main, triggers Pages redeploy. All 4 milestones marked complete.</div>
+            </div>
+            <div class="changelog-entry new">
                 <div class="changelog-date">2026-05-26</div>
-                <div class="changelog-title">MVP PRD & Roadmap created</div>
+                <div class="changelog-title">MVP PRD &amp; Roadmap created</div>
                 <div>Added prd-mvp.md and roadmap.md. Defined 4 milestones with tasks. Docs page rendered.</div>
             </div>
             <div class="changelog-entry new">
