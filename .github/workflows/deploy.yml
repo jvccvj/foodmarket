@@ -1,4 +1,4 @@
-name: Deploy CSV Plot
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -8,29 +8,32 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  package:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v5
 
-      - name: Package site
-        run: zip -r site.zip index.html
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-pages-artifact@v4
         with:
-          name: csv-plot-site
-          path: site.zip
-          retention-days: 30
+          path: '.'
 
-      - name: Create Release
-        if: github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v1
-        with:
-          files: site.zip
-          tag_name: v1.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
