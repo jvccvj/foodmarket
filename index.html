@@ -15,6 +15,9 @@
             background: #f9f7f2;
             color: #2d3a2e;
         }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        nav a { margin-left: 1rem; color: #3a5f3a; text-decoration: none; font-weight: 600; }
+        nav a:hover { color: #4a7a4a; }
         h1 { color: #3a5f3a; text-align: center; margin-bottom: 0.5rem; font-size: 2rem; }
         .subtitle { text-align: center; color: #6b7c6b; margin-bottom: 2rem; font-size: 1.1rem; }
         canvas { max-width: 100%; }
@@ -23,6 +26,13 @@
     </style>
 </head>
 <body>
+    <header>
+        <div></div>
+        <nav>
+            <a href="index.html">Chart</a>
+            <a href="docs.html">Docs</a>
+        </nav>
+    </header>
     <h1>🍎 Fresh Market Prices</h1>
     <p class="subtitle">Seasonal fruit, vegetable &amp; dairy trends</p>
     <canvas id="csvChart"></canvas>
