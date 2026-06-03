@@ -186,11 +186,11 @@
         Prices from <strong>Mercasa</strong> (Spanish wholesale food markets):
       </p>
       <div class="tech-stack" style="margin-top: 0.75rem;">
-        <span class="tech-badge" style="background: #c0392b;">Cerezas</span>
+        <span class="tech-badge" style="background: #27ae60;">🍒 Cerezas</span>
         <span style="color: var(--text-muted);">Cherries — 7 daily records (May 2026)</span>
       </div>
       <div class="tech-stack" style="margin-top: 0.5rem;">
-        <span class="tech-badge" style="background: #e74c3c;">Fresones</span>
+        <span class="tech-badge" style="background: #8e44ad;">🍓 Fresones</span>
         <span style="color: var(--text-muted);">Strawberries — 12 daily records (Mar-Apr 2026)</span>
       </div>
       <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
@@ -248,9 +248,10 @@
 
     function renderTable(prices) {
       const tbody = document.getElementById('priceBody');
+      const emojiMap = { 'Cerezas': '🍒', 'Fresones': '🍓' };
       tbody.innerHTML = prices.map(p => `
         <tr>
-          <td style="font-weight: 600;">${p.item}</td>
+          <td style="font-weight: 600;">${emojiMap[p.item] || ''} ${p.item}</td>
           <td>${p.day}/${p.month}/2026</td>
           <td>€${p.price.toFixed(2)}</td>
           <td>${p.markets} markets</td>
@@ -274,15 +275,16 @@
       const items = [...new Set(prices.map(p => p.item))];
       
       const colors = {
-        'Cerezas':  { border: '#27ae60', bg: 'rgba(39,174,96,0.15)' },
-        'Fresones': { border: '#8e44ad', bg: 'rgba(142,68,173,0.15)' }
+        '🍒 Cerezas':  { border: '#27ae60', bg: 'rgba(39,174,96,0.15)' },
+        '🍓 Fresones': { border: '#8e44ad', bg: 'rgba(142,68,173,0.15)' }
       };
       
       const datasets = items.map(item => {
-        const c = colors[item];
+        const label = item === 'Cerezas' ? '🍒 Cerezas' : '🍓 Fresones';
+        const c = colors[label];
         const priceMap = new Map(prices.filter(p => p.item === item).map(p => [`${p.day}/${p.month}`, p.price]));
         return {
-          label: item,
+          label: label,
           data: labels.map(label => priceMap.get(label) || null),
           borderWidth: 3,
           borderColor: c.border,
