@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fresh Market — Rails + Hotwire/Turbo</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <style>
+    :root {
+      --bg: #f9f7f2;
+      --green: #3a5f3a;
+      --green-light: #4a7a4a;
+      --text: #2d3a2e;
+      --text-muted: #6b7c6b;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Nunito', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+      border-bottom: 3px solid var(--green);
+    }
+    
+    .header h1 {
+      color: var(--green);
+      font-size: 1.5rem;
+    }
+    
+    nav { display: flex; gap: 1rem; }
+    
+    .nav-link {
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .nav-link:hover { background: rgba(58, 95, 58, 0.12); }
+    
+    .container {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #e67e22, #f39c12);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+    
+    h2 {
+      color: var(--green);
+      margin-bottom: 0.75rem;
+      font-size: 1.25rem;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 12px rgba(45, 58, 46, 0.08);
+      margin-bottom: 1.5rem;
+    }
+    
+    .chart-wrapper {
+      position: relative;
+      height: 400px;
+      margin: 1rem 0;
+    }
+    
+    .loading {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .skeleton {
+      height: 400px;
+      background: linear-gradient(90deg, #e8e6e1 25%, #f2f0eb 50%, #e8e6e1 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: 8px;
+    }
+    
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .hidden { display: none !important; }
+    
+    .legend-note {
+      text-align: center;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    
+    .tech-badge {
+      background: var(--green);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+    }
+    
+    .feature-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    
+    .feature-list li::before {
+      content: "✓";
+      color: var(--green);
+      font-weight: bold;
+    }
+    
+    .api-preview {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+    
+    .api-preview .key { color: #89b4fa; }
+    .api-preview .string { color: #a6e3a1; }
+    .api-preview .number { color: #fab387; }
+    
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(58, 95, 58, 0.2);
+      margin-top: 3rem;
+    }
+    
+    footer a { color: var(--green); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🍎 Fresh Market Prices</h1>
+    <nav>
+      <a href="index.html" class="nav-link">Chart</a>
+      <a href="docs.html" class="nav-link">Docs</a>
+      <a href="ror.html" class="nav-link" style="background: rgba(58,95,58,0.1);">Rails Demo</a>
+    </nav>
+  </header>
+  
+  <main class="container">
+    <div class="badge">Rails + Hotwire/Turbo Demo</div>
+    <h2>Fresh Food Price Trends</h2>
+    <p class="subtitle">Seasonal fruit, vegetable & dairy trends — Jan through Jun 2026</p>
+    
+    <div class="card">
+      <div id="chart-frame" data-controller="chart">
+        <div id="loading" class="loading">
+          <div class="skeleton"></div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="priceChart"></canvas>
+        </div>
+      </div>
+      <p class="legend-note">🥕 Prices in USD/kg &nbsp;|&nbsp; 📊 6-month trend &nbsp;|&nbsp; 🔄 Auto-refreshes every 60s</p>
+    </div>
+    
+    <div class="card">
+      <h2>Tech Stack</h2>
+      <div class="tech-stack">
+        <span class="tech-badge">Rails 7</span>
+        <span class="tech-badge">Hotwire</span>
+        <span class="tech-badge">Turbo</span>
+        <span class="tech-badge">Stimulus</span>
+        <span class="tech-badge">Chart.js</span>
+        <span class="tech-badge">Tailwind CSS</span>
+        <span class="tech-badge">SQLite</span>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Features</h2>
+      <ul class="feature-list">
+        <li>Auto-refresh every 60 seconds via Stimulus</li>
+        <li>Turbo Frames for seamless navigation</li>
+        <li>Loading skeletons while fetching</li>
+        <li>Responsive design with Tailwind</li>
+        <li>RESTful API endpoints</li>
+        <li>Active Record with SQLite</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h2>API Response</h2>
+      <div class="api-preview">
+<span class="key">"prices"</span>: [
+  &#123;
+    <span class="key">"id"</span>: <span class="number">1</span>,
+    <span class="key">"item"</span>: <span class="string">"Apples"</span>,
+    <span class="key">"price"</span>: <span class="number">3.50</span>,
+    <span class="key">"unit"</span>: <span class="string">"USD/kg"</span>,
+    <span class="key">"month"</span>: <span class="string">"Jan"</span>,
+    <span class="key">"recorded_at"</span>: <span class="string">"2026-01-15T00:00:00Z"</span>
+  &#125;,
+  ...
+]
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Built with Two Parallel Agents</h2>
+      <p style="color: var(--text-muted); margin-bottom: 1rem;">
+        This Rails app was constructed using OpenHands agents working in parallel:
+      </p>
+      <div class="tech-stack">
+        <span class="tech-badge" style="background: #2980b9;">Agent A — Backend</span>
+        <span style="color: var(--text-muted);">Price model, API controller, migration, seeds</span>
+      </div>
+      <div class="tech-stack" style="margin-top: 0.5rem;">
+        <span class="tech-badge" style="background: #c0392b;">Agent B — Frontend</span>
+        <span style="color: var(--text-muted);">Views, Stimulus controller, Chart.js integration</span>
+      </div>
+      <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
+        See <a href="rails-agent-log.md" style="color: var(--green);">rails-agent-log.md</a> for full execution details.
+      </p>
+    </div>
+  </main>
+  
+  <footer>
+    🍎 Fresh Market Prices &nbsp;|&nbsp;
+    <a href="https://github.com/jvccvj/foodmarket">GitHub</a> &nbsp;|&nbsp;
+    <a href="https://jvccvj.github.io/foodmarket/ror.html">Source</a>
+  </footer>
+  
+  <script>
+    // Simulated price data (would come from /api/prices in Rails)
+    const PRICE_DATA = {
+      prices: [
+        { id: 1, item: "Apples",   price: 3.20, unit: "USD/kg", month: "Jan", recorded_at: "2026-01-15T00:00:00Z" },
+        { id: 2, item: "Apples",   price: 3.50, unit: "USD/kg", month: "Feb", recorded_at: "2026-02-15T00:00:00Z" },
+        { id: 3, item: "Apples",   price: 3.10, unit: "USD/kg", month: "Mar", recorded_at: "2026-03-15T00:00:00Z" },
+        { id: 4, item: "Apples",   price: 3.80, unit: "USD/kg", month: "Apr", recorded_at: "2026-04-15T00:00:00Z" },
+        { id: 5, item: "Apples",   price: 4.20, unit: "USD/kg", month: "May", recorded_at: "2026-05-15T00:00:00Z" },
+        { id: 6, item: "Apples",   price: 4.50, unit: "USD/kg", month: "Jun", recorded_at: "2026-06-15T00:00:00Z" },
+        { id: 7, item: "Tomatoes", price: 2.50, unit: "USD/kg", month: "Jan", recorded_at: "2026-01-15T00:00:00Z" },
+        { id: 8, item: "Tomatoes", price: 2.80, unit: "USD/kg", month: "Feb", recorded_at: "2026-02-15T00:00:00Z" },
+        { id: 9, item: "Tomatoes", price: 2.30, unit: "USD/kg", month: "Mar", recorded_at: "2026-03-15T00:00:00Z" },
+        { id: 10, item: "Tomatoes", price: 2.90, unit: "USD/kg", month: "Apr", recorded_at: "2026-04-15T00:00:00Z" },
+        { id: 11, item: "Tomatoes", price: 3.10, unit: "USD/kg", month: "May", recorded_at: "2026-05-15T00:00:00Z" },
+        { id: 12, item: "Tomatoes", price: 3.40, unit: "USD/kg", month: "Jun", recorded_at: "2026-06-15T00:00:00Z" },
+        { id: 13, item: "Milk",    price: 4.10, unit: "USD/kg", month: "Jan", recorded_at: "2026-01-15T00:00:00Z" },
+        { id: 14, item: "Milk",    price: 4.20, unit: "USD/kg", month: "Feb", recorded_at: "2026-02-15T00:00:00Z" },
+        { id: 15, item: "Milk",    price: 4.00, unit: "USD/kg", month: "Mar", recorded_at: "2026-03-15T00:00:00Z" },
+        { id: 16, item: "Milk",    price: 4.30, unit: "USD/kg", month: "Apr", recorded_at: "2026-04-15T00:00:00Z" },
+        { id: 17, item: "Milk",    price: 4.50, unit: "USD/kg", month: "May", recorded_at: "2026-05-15T00:00:00Z" },
+        { id: 18, item: "Milk",    price: 4.80, unit: "USD/kg", month: "Jun", recorded_at: "2026-06-15T00:00:00Z" }
+      ]
+    };
+
+    // Chart.js Stimulus-like controller
+    class ChartController {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.loading = document.getElementById('loading');
+        this.chart = null;
+        this.init();
+      }
+      
+      init() {
+        // Show loading, fetch data, render chart
+        this.renderChart(PRICE_DATA.prices);
+        
+        // Auto-refresh every 60 seconds
+        setInterval(() => {
+          this.renderChart(PRICE_DATA.prices);
+        }, 60000);
+      }
+      
+      renderChart(prices) {
+        const ctx = this.canvas.getContext('2d');
+        
+        const months = [...new Set(prices.map(p => p.month))];
+        const items = [...new Set(prices.map(p => p.item))];
+        
+        const colors = {
+          'Apples':   { border: '#c0392b', bg: 'rgba(192,57,43,0.15)' },
+          'Tomatoes': { border: '#e67e22', bg: 'rgba(230,126,34,0.15)' },
+          'Milk':     { border: '#2980b9', bg: 'rgba(41,128,185,0.15)' }
+        };
+        
+        const datasets = items.map(item => {
+          const c = colors[item] || { border: '#666', bg: 'rgba(102,102,102,0.15)' };
+          return {
+            label: item,
+            data: months.map(month => {
+              const p = prices.find(pr => pr.item === item && pr.month === month);
+              return p ? p.price : null;
+            }),
+            borderWidth: 3,
+            borderColor: c.border,
+            backgroundColor: c.bg,
+            pointRadius: 6,
+            pointHoverRadius: 9,
+            fill: true,
+            tension: 0.3
+          };
+        });
+        
+        if (this.chart) {
+          this.chart.data.labels = months;
+          this.chart.data.datasets = datasets;
+          this.chart.update();
+        } else {
+          this.chart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: months, datasets },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { intersect: false, mode: 'index' },
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    font: { family: 'Nunito', size: 14, weight: '600' },
+                    color: '#2d3a2e',
+                    usePointStyle: true,
+                    padding: 20
+                  }
+                },
+                tooltip: {
+                  backgroundColor: '#2d3a2e',
+                  titleFont: { family: 'Nunito', size: 13 },
+                  bodyFont: { family: 'Nunito', size: 12 },
+                  padding: 12,
+                  cornerRadius: 8,
+                  callbacks: {
+                    label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}/kg`
+                  }
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: false,
+                  min: 2,
+                  max: 5.5,
+                  title: {
+                    display: true,
+                    text: 'Price (USD/kg)',
+                    color: '#3a5f3a',
+                    font: { family: 'Nunito', size: 13, weight: '600' }
+                  },
+                  grid: { color: 'rgba(0,0,0,0.06)' },
+                  ticks: { 
+                    color: '#6b7c6b', 
+                    font: { family: 'Nunito' },
+                    callback: v => '$' + v.toFixed(2)
+                  }
+                },
+                x: {
+                  grid: { color: 'rgba(0,0,0,0.04)' },
+                  ticks: { color: '#6b7c6b', font: { family: 'Nunito' } }
+                }
+              }
+            }
+          });
+        }
+        
+        // Hide loading
+        if (this.loading) this.loading.classList.add('hidden');
+      }
+    }
+    
+    // Initialize when DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      new ChartController('priceChart');
+    });
+  </script>
+</body>
+</html>
