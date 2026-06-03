@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fresh Market Prices — Rails Demo</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <style>
+    :root {
+      --bg: #f9f7f2;
+      --green: #3a5f3a;
+      --green-light: #4a7a4a;
+      --text: #2d3a2e;
+      --text-muted: #6b7c6b;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Nunito', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+      border-bottom: 3px solid var(--green);
+      width: 100%;
+    }
+    
+    .header h1 { color: var(--green); font-size: 1.5rem; }
+    
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #e67e22, #f39c12);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .container {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      flex: 1;
+    }
+    
+    h2 { color: var(--green); margin-bottom: 0.75rem; font-size: 1.25rem; }
+    
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 12px rgba(45, 58, 46, 0.08);
+      margin-bottom: 1.5rem;
+    }
+    
+    .chart-wrapper { position: relative; height: 400px; margin: 1rem 0; }
+    
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    
+    .tech-badge {
+      background: var(--green);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    
+    .data-table th, .data-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .data-table th { color: var(--green); font-weight: 600; }
+    .data-table tr:hover { background: #f9f9f9; }
+    
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(58, 95, 58, 0.2);
+      margin-top: auto;
+    }
+    
+    footer a { color: var(--green); }
+    
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🍎 Fresh Market Prices</h1>
+  </header>
+  
+  <main class="container">
+    <div class="badge">Mercasa Real Data</div>
+    <h2>Daily Wholesale Market Prices</h2>
+    <p class="subtitle">Cerezas &amp; Fresones — sourced from 5 Mercasa markets (Spain) &nbsp;|&nbsp; EUR/kg</p>
+    
+    <div class="card">
+      <div class="chart-wrapper">
+        <canvas id="priceChart"></canvas>
+      </div>
+      <p style="text-align: center; color: var(--text-muted); margin-top: 1rem; font-size: 0.9rem;">
+        📊 Real data from Mercasa wholesale markets &nbsp;|&nbsp; 🔄 Auto-refreshes every 60s
+      </p>
+    </div>
+    
+    <div class="card">
+      <h2>Daily Price Records</h2>
+      <table class="data-table" id="priceTable">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Date</th>
+            <th>Price (EUR/kg)</th>
+            <th>Source Markets</th>
+          </tr>
+        </thead>
+        <tbody id="priceBody">
+          <tr><td colspan="4" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="card">
+      <h2>Tech Stack</h2>
+      <div class="tech-stack">
+        <span class="tech-badge">Rails 7</span>
+        <span class="tech-badge">Hotwire</span>
+        <span class="tech-badge">Turbo</span>
+        <span class="tech-badge">Stimulus</span>
+        <span class="tech-badge">Chart.js</span>
+        <span class="tech-badge">SQLite</span>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Data Source</h2>
+      <p style="color: var(--text-muted);">
+        Prices from <strong>Mercasa</strong> (Spanish wholesale food markets):
+      </p>
+      <div class="tech-stack" style="margin-top: 0.75rem;">
+        <span class="tech-badge" style="background: #c0392b;">Cerezas</span>
+        <span style="color: var(--text-muted);">Cherries — 7 daily records (May 2026)</span>
+      </div>
+      <div class="tech-stack" style="margin-top: 0.5rem;">
+        <span class="tech-badge" style="background: #e74c3c;">Fresones</span>
+        <span style="color: var(--text-muted);">Strawberries — 12 daily records (Mar-Apr 2026)</span>
+      </div>
+      <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
+        Markets: Mercamadrid, Mercabarna, Mercabilbao, Mercasevilla, Mercavalencia
+      </p>
+    </div>
+  </main>
+  
+  <footer>
+    🍎 Fresh Market Prices &nbsp;|&nbsp;
+    <a href="https://github.com/jvccvj/foodmarket">GitHub</a>
+  </footer>
+  
+  <script>
+    // Real price data from Mercasa (Spanish wholesale markets)
+    // Source: data/mercasa-2026-normalizado.csv
+    // Aggregated: average price per product per day across 5 markets
+    const PRICE_DATA = {
+      prices: [
+        // Cerezas (Cherries) — daily averages across 5 markets
+        { item: "Cerezas", price: 2.44, day: "05", month: "May", markets: 43 },
+        { item: "Cerezas", price: 2.24, day: "08", month: "May", markets: 43 },
+        { item: "Cerezas", price: 2.55, day: "12", month: "May", markets: 48 },
+        { item: "Cerezas", price: 2.34, day: "15", month: "May", markets: 48 },
+        { item: "Cerezas", price: 2.31, day: "19", month: "May", markets: 48 },
+        { item: "Cerezas", price: 2.21, day: "22", month: "May", markets: 49 },
+        { item: "Cerezas", price: 2.22, day: "26", month: "May", markets: 48 },
+        // Fresones (Strawberries) — daily averages
+        { item: "Fresones", price: 1.80, day: "20", month: "Mar", markets: 46 },
+        { item: "Fresones", price: 1.67, day: "24", month: "Mar", markets: 44 },
+        { item: "Fresones", price: 1.63, day: "27", month: "Mar", markets: 45 },
+        { item: "Fresones", price: 1.53, day: "31", month: "Mar", markets: 46 },
+        { item: "Fresones", price: 1.82, day: "03", month: "Apr", markets: 31 },
+        { item: "Fresones", price: 2.41, day: "07", month: "Apr", markets: 46 },
+        { item: "Fresones", price: 2.34, day: "10", month: "Apr", markets: 46 },
+        { item: "Fresones", price: 2.26, day: "14", month: "Apr", markets: 46 },
+        { item: "Fresones", price: 2.26, day: "17", month: "Apr", markets: 44 },
+        { item: "Fresones", price: 2.25, day: "21", month: "Apr", markets: 44 },
+        { item: "Fresones", price: 2.26, day: "24", month: "Apr", markets: 44 },
+        { item: "Fresones", price: 2.24, day: "28", month: "Apr", markets: 44 }
+      ]
+    };
+
+    // Initialize chart and table
+    function init() {
+      renderTable(PRICE_DATA.prices);
+      renderChart(PRICE_DATA.prices);
+      
+      // Auto-refresh every 60 seconds
+      setInterval(() => {
+        renderTable(PRICE_DATA.prices);
+        renderChart(PRICE_DATA.prices);
+      }, 60000);
+    }
+
+    function renderTable(prices) {
+      const tbody = document.getElementById('priceBody');
+      tbody.innerHTML = prices.map(p => `
+        <tr>
+          <td style="font-weight: 600;">${p.item}</td>
+          <td>${p.day}/${p.month}/2026</td>
+          <td>€${p.price.toFixed(2)}</td>
+          <td>${p.markets} markets</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderChart(prices) {
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      
+      // Sort by date
+      const sorted = [...prices].sort((a, b) => {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const ma = months.indexOf(a.month);
+        const mb = months.indexOf(b.month);
+        if (ma !== mb) return ma - mb;
+        return parseInt(a.day) - parseInt(b.day);
+      });
+      
+      const labels = sorted.map(p => `${p.day}/${p.month}`);
+      const items = [...new Set(prices.map(p => p.item))];
+      
+      const colors = {
+        'Cerezas':  { border: '#c0392b', bg: 'rgba(192,57,43,0.15)' },
+        'Fresones': { border: '#e74c3c', bg: 'rgba(231,76,60,0.15)' }
+      };
+      
+      const datasets = items.map(item => {
+        const c = colors[item];
+        const priceMap = new Map(prices.filter(p => p.item === item).map(p => [`${p.day}/${p.month}`, p.price]));
+        return {
+          label: item,
+          data: labels.map(label => priceMap.get(label) || null),
+          borderWidth: 3,
+          borderColor: c.border,
+          backgroundColor: c.bg,
+          pointRadius: 6,
+          pointHoverRadius: 9,
+          fill: true,
+          tension: 0.3
+        };
+      });
+      
+      new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { intersect: false, mode: 'index' },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { font: { family: 'Nunito', size: 14 }, usePointStyle: true, padding: 20 }
+            },
+            tooltip: {
+              backgroundColor: '#2d3a2e',
+              padding: 12,
+              cornerRadius: 8,
+              callbacks: { label: ctx => `${ctx.dataset.label}: €${ctx.parsed.y.toFixed(2)}/kg` }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Price (EUR/kg)', color: '#3a5f3a' },
+              ticks: { callback: v => '€' + v.toFixed(2) }
+            },
+            x: { grid: { color: 'rgba(0,0,0,0.04)' } }
+          }
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
