@@ -205,7 +205,7 @@
   
   <main class="container">
     <div class="badge">Mercasa Real Data</div>
-    <h2>Spanish Wholesale Market Prices</h2>
+    <h2>Daily Wholesale Market Prices</h2>
     <p class="subtitle">Cerezas &amp; Fresones — sourced from 5 Mercasa markets (Spain) &nbsp;|&nbsp; EUR/kg</p>
     
     <div class="card">
@@ -297,13 +297,30 @@
   <script>
     // Real price data from Mercasa (Spanish wholesale markets)
     // Source: /workspace/mercasa-2026-normalizado.csv
-    // Aggregated: average price per product per month
+    // Aggregated: average price per product per day across 5 markets
     const PRICE_DATA = {
       prices: [
-        // Cerezas (Cherries) — avg across 5 markets
-        { id: 1, item: "Cerezas",   price: 2.33, unit: "EUR/kg", month: "May", recorded_at: "2026-05-26T00:00:00Z" },
-        // Fresones (Strawberries) — avg across 5 markets
-        { id: 2, item: "Fresones",  price: 1.66, unit: "EUR/kg", month: "Mar", recorded_at: "2026-03-15T00:00:00Z" }
+        // Cerezas (Cherries) — daily averages across Mercamadrid, Mercabarna, Mercabilbao, Mercasevilla, Mercavalencia
+        { id: 1,  item: "Cerezas",   price: 2.44, unit: "EUR/kg", day: "05", month: "May", recorded_at: "2026-05-05T00:00:00Z" },
+        { id: 2,  item: "Cerezas",   price: 2.24, unit: "EUR/kg", day: "08", month: "May", recorded_at: "2026-05-08T00:00:00Z" },
+        { id: 3,  item: "Cerezas",   price: 2.55, unit: "EUR/kg", day: "12", month: "May", recorded_at: "2026-05-12T00:00:00Z" },
+        { id: 4,  item: "Cerezas",   price: 2.34, unit: "EUR/kg", day: "15", month: "May", recorded_at: "2026-05-15T00:00:00Z" },
+        { id: 5,  item: "Cerezas",   price: 2.31, unit: "EUR/kg", day: "19", month: "May", recorded_at: "2026-05-19T00:00:00Z" },
+        { id: 6,  item: "Cerezas",   price: 2.21, unit: "EUR/kg", day: "22", month: "May", recorded_at: "2026-05-22T00:00:00Z" },
+        { id: 7,  item: "Cerezas",   price: 2.22, unit: "EUR/kg", day: "26", month: "May", recorded_at: "2026-05-26T00:00:00Z" },
+        // Fresones (Strawberries) — daily averages
+        { id: 8,  item: "Fresones",  price: 1.80, unit: "EUR/kg", day: "20", month: "Mar", recorded_at: "2026-03-20T00:00:00Z" },
+        { id: 9,  item: "Fresones",  price: 1.67, unit: "EUR/kg", day: "24", month: "Mar", recorded_at: "2026-03-24T00:00:00Z" },
+        { id: 10, item: "Fresones",  price: 1.63, unit: "EUR/kg", day: "27", month: "Mar", recorded_at: "2026-03-27T00:00:00Z" },
+        { id: 11, item: "Fresones",  price: 1.53, unit: "EUR/kg", day: "31", month: "Mar", recorded_at: "2026-03-31T00:00:00Z" },
+        { id: 12, item: "Fresones",  price: 1.82, unit: "EUR/kg", day: "03", month: "Apr", recorded_at: "2026-04-03T00:00:00Z" },
+        { id: 13, item: "Fresones",  price: 2.41, unit: "EUR/kg", day: "07", month: "Apr", recorded_at: "2026-04-07T00:00:00Z" },
+        { id: 14, item: "Fresones",  price: 2.34, unit: "EUR/kg", day: "10", month: "Apr", recorded_at: "2026-04-10T00:00:00Z" },
+        { id: 15, item: "Fresones",  price: 2.26, unit: "EUR/kg", day: "14", month: "Apr", recorded_at: "2026-04-14T00:00:00Z" },
+        { id: 16, item: "Fresones",  price: 2.26, unit: "EUR/kg", day: "17", month: "Apr", recorded_at: "2026-04-17T00:00:00Z" },
+        { id: 17, item: "Fresones",  price: 2.25, unit: "EUR/kg", day: "21", month: "Apr", recorded_at: "2026-04-21T00:00:00Z" },
+        { id: 18, item: "Fresones",  price: 2.26, unit: "EUR/kg", day: "24", month: "Apr", recorded_at: "2026-04-24T00:00:00Z" },
+        { id: 19, item: "Fresones",  price: 2.24, unit: "EUR/kg", day: "28", month: "Apr", recorded_at: "2026-04-28T00:00:00Z" }
       ]
     };
 
@@ -329,7 +346,9 @@
       renderChart(prices) {
         const ctx = this.canvas.getContext('2d');
         
-        const months = [...new Set(prices.map(p => p.month))];
+        // Sort by date for chronological order
+        const sorted = [...prices].sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
+        const labels = sorted.map(p => `${p.day}/${p.month}`);
         const items = [...new Set(prices.map(p => p.item))];
         
         const colors = {
@@ -339,12 +358,10 @@
         
         const datasets = items.map(item => {
           const c = colors[item] || { border: '#666', bg: 'rgba(102,102,102,0.15)' };
+          const priceMap = new Map(prices.filter(p => p.item === item).map(p => [`${p.day}/${p.month}`, p.price]));
           return {
             label: item,
-            data: months.map(month => {
-              const p = prices.find(pr => pr.item === item && pr.month === month);
-              return p ? p.price : null;
-            }),
+            data: labels.map(label => priceMap.get(label) || null),
             borderWidth: 3,
             borderColor: c.border,
             backgroundColor: c.bg,
@@ -356,7 +373,7 @@
         });
         
         if (this.chart) {
-          this.chart.data.labels = months;
+          this.chart.data.labels = labels;
           this.chart.data.datasets = datasets;
           this.chart.update();
         } else {
