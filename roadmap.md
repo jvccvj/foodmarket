@@ -1,71 +1,131 @@
-# Roadmap: Fresh Market Prices MVP
+# Fresh Market — Project Log
 
-## Milestones
+## API Investigation: OpenFoodFacts
 
-### Milestone 1 — Current Prototype ✅
-**Goal:** Basic working visualization (already done)
+**Date:** 2026-06-03
+**Goal:** Find real price data via https://world.openfoodfacts.org/data
+**Status:** ❌ Not applicable — no price field available
 
-- [x] Single HTML file with Chart.js
-- [x] Embedded CSV data (Apples, Tomatoes, Milk)
-- [x] Responsive design with fresh food styling
-- [x] GitHub Pages deployment
+### Test Request
+
+```
+GET https://world.openfoodfacts.org/cgi/search.pl?search_terms=apple&json=1&page_size=5&fields=product_name,brands,nutriscore_grade,ecoscore_grade
+```
+
+### Available Fields
+
+| Field | Available | Notes |
+|-------|-----------|-------|
+| product_name | ✅ | e.g., "Pom'Potes Bio - Pomme Bio" |
+| brands | ✅ | e.g., "Materne", "Andros" |
+| categories | ✅ | Hierarchical tags |
+| nutriscore_grade | ✅ | a, b, c, d, e |
+| ecoscore_grade | ✅ | a to f + a-plus |
+| price | ❌ | **Not available** |
+| price_history | ❌ | **Not available** |
+
+### Sample Apple Products Returned
+
+| Name | Brand | Nutriscore | Ecoscore |
+|------|-------|------------|----------|
+| Pom'Potes Bio - Pomme Bio | Materne | a | a-plus |
+| Purée Pomme Poire Williams | Jardin Bio | a | a-plus |
+| Compote de pomme allégée | Andros | a | a |
+
+### Conclusion
+
+OpenFoodFacts is a **nutrition/sustainability database**, not a price database. It tracks:
+- Nutriscore grades (A-E health rating)
+- Ecoscore ratings (environmental impact)
+- Nutritional data per 100g
+- Product categorization
+
+**Not suitable for:** Price trend charts.
+
+**Alternatives for real price data (future investigation):**
+- USDA Market News API
+- Bureau of Labor Statistics CPI data
+- Government open data portals
+
+### Decision
+
+Keep simulated data approach for MVP. The `refresh.yml` workflow generates realistic weekly price fluctuations for Apples, Tomatoes, and Milk — sufficient for MVP demonstration.
 
 ---
 
-### Milestone 2 — Auto-Refresh Data Pipeline 🛠
-**Goal:** Data updates weekly without manual intervention
+## Rails App Investigation
 
-- [ ] Define data source (API, spreadsheet, etc.)
-- [ ] Build GitHub Actions cron workflow to fetch and commit new CSV data
-- [ ] Add graceful failure handling (notify if source unavailable)
-- [ ] Document the data update process in README
+**Date:** 2026-06-03
+**Goal:** Rebuild prototype with Rails + Hotwire/Turbo
+**Status:** ✅ Structure created — awaiting Ruby environment
 
-**Estimated effort:** 2–3 days
+### Agent Setup
+
+Two file-based agents created in parallel:
+
+| Agent | Role | Files Created |
+|-------|------|---------------|
+| `rails-backend.md` | Senior Rails Developer | Model, migration, API controller, seeds |
+| `rails-frontend.md` | Hotwire Specialist | Views, Stimulus, Chart.js |
+
+### Rails App Structure
+
+```
+/workspace/project/foodmarket-rails/
+├── Gemfile
+├── README.md
+├── config/
+│   ├── routes.rb
+│   └── importmap.rb
+├── app/
+│   ├── controllers/
+│   │   ├── api/prices_controller.rb
+│   │   └── charts_controller.rb
+│   ├── models/price.rb
+│   ├── views/charts/index.html.erb
+│   └── javascript/controllers/
+│       ├── index.js
+│       └── chart_controller.js
+└── db/
+    ├── migrate/20250603000001_create_prices.rb
+    └── seeds.rb
+```
+
+### API Response
+
+```json
+GET /api/prices
+{
+  "prices": [
+    {"id": 1, "item": "Apples", "price": 3.50, "unit": "USD/kg", "month": "Jan", "recorded_at": "2026-06-03T12:00:00Z"},
+    ...
+  ]
+}
+```
+
+### Next Steps (when Ruby available)
+
+```bash
+cd /workspace/project/foodmarket-rails
+bundle install
+rails db:create db:migrate db:seed
+rails server
+```
+
+Full log: `rails-agent-log.md`
 
 ---
 
-### Milestone 3 — Documentation Page
-**Goal:** Render PRD and roadmap as part of the website
+## Architecture
 
-- [ ] Create `/docs/index.html` with rendered PRD + roadmap
-- [ ] Add navigation between main chart and docs pages
-- [ ] Include changelog / version history
+- **Frontend:** Single HTML file with Chart.js (no build step)
+- **Hosting:** GitHub Pages
+- **Data refresh:** Weekly cron via `.github/workflows/refresh.yml`
+- **Documentation:** `docs.html` (rendered), `prd-mvp.md`, `roadmap.md`
 
-**Estimated effort:** 1 day
+## Workflows
 
----
-
-### Milestone 4 — GitHub Project Board
-**Goal:** Organize tasks, track progress, assign work
-
-- [ ] Create GitHub Project (Kanban board)
-- [ ] Add issues for each open task from Milestones 2–3
-- [ ] Set up labels and milestones
-- [ ] Enable GitHub Actions integration for automated status updates
-
-**Estimated effort:** 0.5 day
-
----
-
-## Task Summary
-
-| # | Task | Milestone | Status | Notes |
-|---|------|-----------|--------|-------|
-| 1 | Define data source | 2 | 🔴 Todo | Need to pick a source |
-| 2 | Build cron workflow | 2 | 🔴 Todo | curl/wget + commit |
-| 3 | Add failure notifications | 2 | 🔴 Todo | Slack/email on failure |
-| 4 | Write README for data | 2 | 🔴 Todo | Document source & process |
-| 5 | Render docs page | 3 | 🔴 Todo | /docs page with MD content |
-| 6 | Add nav between pages | 3 | 🔴 Todo | Header links |
-| 7 | Create GitHub Project | 4 | 🔴 Todo | Kanban board |
-| 8 | Add issues for tasks | 4 | 🔴 Todo | One issue per open task |
-
-## Next Action
-
-**Start Milestone 2, Task 1:** Choose a data source for weekly price updates.
-
-Options:
-- A. Public API (e.g., USDA, market data providers)
-- B. Google Sheets export (manual or automated)
-- C. Simulated data (for demo purposes)
-- D. Custom script output
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `deploy.yml` | push to main | Deploy to GitHub Pages |
+| `refresh.yml` | every Monday 00:00 UTC + manual | Generate new CSV data, commit, push |
