@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fresh Market — Charts</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <header class="header">
+      <h1>🍎 Fresh Market Prices</h1>
+      <nav>
+        <%= link_to 'Chart', charts_path, class: 'nav-link' %>
+        <%= link_to 'API', api_prices_path, class: 'nav-link' %>
+      </nav>
+    </header>
+    
+    <main class="container">
+      <p class="subtitle">Seasonal fruit, vegetable &amp; dairy trends</p>
+      
+      <div id="chart-frame" data-controller="chart">
+        <div class="chart-loading" data-chart-target="loading">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+        
+        <canvas id="priceChart" data-chart-target="canvas"></canvas>
+      </div>
+      
+      <p class="legend-note">🥕 Prices in USD/kg &nbsp;|&nbsp; 📊 Jan–Jun 2024</p>
+    </main>
+  </body>
+</html>
